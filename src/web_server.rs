@@ -29,7 +29,7 @@ pub fn run(spirc: SpircManager) {
                middleware!(spirc_device_list.devices().to_json()));
 
     let spirc_get_tracks = spirc.clone();
-    server.get("/:device/:tracks",
+    server.get("/:device/tracks",
                middleware! { |req, res|
         if let Some(tracks) = spirc_get_tracks.device_tracks(req.param("device").unwrap()) {
             return res.send(tracks.ids
@@ -39,6 +39,16 @@ pub fn run(spirc: SpircManager) {
         }
 
         (StatusCode::NotFound, "No tracks for that device id.")
+    });
+
+    let spirc_get_track = spirc.clone();
+    server.get("/:device/track",
+               middleware! { |req, res|
+        if let Some(tracks) = spirc_get_track.device_tracks(req.param("device").unwrap()) {
+            return res.send(SpotifyId::to_base62(&tracks.ids[(tracks.index as usize)]));
+        }
+
+        (StatusCode::NotFound, "No track for that device id.")
     });
 
     let spirc_put_tracks = spirc.clone();
